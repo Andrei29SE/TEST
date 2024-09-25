@@ -4,12 +4,15 @@ const MULTILOGIN_URL = 'https://app.multilogin.com/en/home/profiles'
 const USERNAME = 'skiruta.andrei@mail.ru'
 const PASSWORD = 'Andrei2904.'
 
+// 1 Launch Chrom and go to Multilogin sign in page
+
 async function launchQuickProfile() {
   let driver = await new Builder()
     .forBrowser('chrome')
     .setChromeOptions(new chrome.Options())
     .build()
 
+  //  2 Signining in (typing password and login tnen click Login button)
   try {
     await driver.get(MULTILOGIN_URL)
 
@@ -37,8 +40,9 @@ async function launchQuickProfile() {
       .sendKeys(PASSWORD)
     await driver.findElement(By.className('sign-in-form-cta')).click()
 
-    await driver.wait(until.urlContains('/home/profiles'), 5000)
+    // 3 Find and click Quick profile then clicck Launch(without chanching default settings)
 
+    await driver.wait(until.urlContains('/home/profiles'), 5000)
     await driver.wait(
       until.elementLocated(
         By.className('cds--btn cds--btn--tertiary ng-star-inserted')
@@ -66,9 +70,17 @@ async function launchQuickProfile() {
         )
       )
       .click()
+
+    // 4 Searching weather in 5  capital cities
+
     async function getWeather(city) {
-      let driver = await new Builder().forBrowser('chrome').build()
+      let driver = await new Builder()
+        .forBrowser('chrome')
+        .setChromeOptions(new chrome.Options())
+        .build()
       await driver.get(`https://www.google.com/search?q=weather+${city}`)
+
+      //  4 Found elements on the weather app and got their value (tempr and conditions)
 
       let temperature = await driver
         .wait(until.elementLocated(By.id('wob_tm')))
@@ -77,9 +89,10 @@ async function launchQuickProfile() {
         .wait(until.elementLocated(By.id('wob_dc')))
         .getText()
       await driver.quit()
-
       return `${city}: ${temperature}°C, ${condition}`
     }
+
+    // 5 Push results in the new array
 
     async function main() {
       let cities = [
@@ -89,16 +102,14 @@ async function launchQuickProfile() {
         'Canberra',
         'Brasília',
       ]
-      let weatherResults = []
 
+      let weatherResults = []
       for (let city of cities) {
         let weather = await getWeather(city)
         weatherResults.push(weather)
       }
-
       console.log(weatherResults)
     }
-
     main()
   } catch (error) {
     console.error(`Error: ${error.message}`)
